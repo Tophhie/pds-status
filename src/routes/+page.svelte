@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getDidsFromPDS, 
@@ -5,7 +7,9 @@
   getDescriptionFromPDS, 
   getHandleFromDid,
   getTotalPostsThisYear,
-  getBlobUsageFromPDS } from '$lib/api';
+  getBlobUsageFromPDS,
+  getUptimeForMonth,
+  formatDuration } from '$lib/api';
 	import type { Repo } from '@atproto/api/dist/client/types/com/atproto/sync/listRepos';
 
   let metrics = {
@@ -23,42 +27,50 @@
   let r2StorageUsage: string = 'Loading...';
   let totalPostsThisYear: number = 0;
 
-  onMount(async () => {
-    // Fetch accounts from PDS
-    try {
-      accounts = await getDidsFromPDS();
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
-    }
+  let currentMonthUptime: string = 'Loading...';
+  let currentMonthUptimeValue: number = 0;
+  let previousMonthUptime: string = 'Loading...';
+  let previousMonthUptimeValue: number = 0;
+  let totalDowntimeThisMonth: string = 'Loading...';
 
-    // Fetch PDS health metrics
-    try {
-      pdsHealth = await getHealthFromPDS();
-    } catch (error) {
-      console.error('Error fetching PDS health:', error);
-    }
+onMount(async () => {
+  try {
+    const [
+      accountsData,
+      pdsHealthData,
+      pdsDescriptionData,
+      totalPostsData,
+      r2StorageData,
+      currentMonthData,
+      previousMonthData
+    ] = await Promise.all([
+      getDidsFromPDS(),
+      getHealthFromPDS(),
+      getDescriptionFromPDS(),
+      getTotalPostsThisYear(),
+      getBlobUsageFromPDS(),
+      getUptimeForMonth(0),
+      getUptimeForMonth(-1)
+    ]);
 
-    // Fetch PDS description
-    try {
-      pdsDescription = await getDescriptionFromPDS();
-    } catch (error) {
-      console.error('Error fetching PDS description:', error);
-    }
+    // Assign results
+    accounts = accountsData;
+    pdsHealth = pdsHealthData;
+    pdsDescription = pdsDescriptionData;
+    totalPostsThisYear = totalPostsData;
+    r2StorageUsage = r2StorageData;
 
-    // Fetch total posts this year
-    try {
-      totalPostsThisYear = await getTotalPostsThisYear();
-    } catch (error) {
-      console.error('Error fetching total posts this year:', error);
-    }
+    currentMonthUptime = `${currentMonthData.availability.toFixed(2)}%`;
+    currentMonthUptimeValue = currentMonthData.availability.toFixed(2);
+    previousMonthUptime = `${previousMonthData.availability.toFixed(2)}%`;
+    previousMonthUptimeValue = previousMonthData.availability.toFixed(2);
+    totalDowntimeThisMonth = formatDuration(currentMonthData.total_downtime);
 
-    // Fetch R2 Storage Usage
-    try {
-      r2StorageUsage = await getBlobUsageFromPDS();
-    } catch (error) {
-      console.error('Error fetching R2 storage usage:', error);
-    }
-  });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+});
+
 </script>
 
 <div class="min-h-screen bg-[#100235] text-gray-100 p-4 sm:p-6 md:p-8 lg:p-12">
@@ -100,19 +112,82 @@
   </section>
 
   <!-- Interesting Stats -->
-   <section class="mb-6 sm:mb-8">
-    <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Statistics</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-gray-800 p-3 sm:p-4 rounded-lg">
-      <div class="text-center">
-        <p class="text-gray-400 text-xs sm:text-sm mb-1">Total Posts for {(new Date()).getFullYear()}</p>
-        <p class="font-semibold text-sm sm:text-base">{totalPostsThisYear}</p>
+<!-- Interesting Stats -->
+<section class="mb-6 sm:mb-8">
+  <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Statistics</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 text-center bg-gray-800 p-3 sm:p-4 rounded-lg">
+    
+    <!-- Total Posts -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Total Bluesky posts created on tophhie.social in the current year. Data may be stale or cached for up to 1 hour.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
-      <div class="text-center">
-        <p class="text-gray-400 text-xs sm:text-sm mb-1">Cloudflare R2 Blob Usage</p>
-        <p class="font-semibold text-sm sm:text-base">{r2StorageUsage}</p>
-      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Total Bluesky Posts for {(new Date()).getFullYear()} 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base">{totalPostsThisYear}</p>
     </div>
-  </section>
+
+    <!-- Cloudflare R2 Usage -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Data may be stale or cached for up to 1 hour
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Cloudflare R2 Blob Usage 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base">{r2StorageUsage}</p>
+    </div>
+
+    <!-- Uptime Last Month -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Uptime may be stale or cached for up to 10 minutes.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Uptime for last month 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base" class:text-red-500={previousMonthUptimeValue < 99.9} class:text-green-500={previousMonthUptimeValue >= 99.9}>
+        {previousMonthUptime}
+      </p>
+    </div>
+
+    <!-- Uptime This Month -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Uptime may be stale or cached for up to 10 minutes.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Uptime for this month 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base" class:text-red-500={currentMonthUptimeValue < 99.9} class:text-green-500={currentMonthUptimeValue >= 99.9}>
+        {currentMonthUptime}
+      </p>
+    </div>
+
+    <!-- Total Downtime -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Uptime may be stale or cached for up to 10 minutes.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Total Downtime This Month 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base">{totalDowntimeThisMonth}</p>
+    </div>
+
+  </div>
+</section>
 
   <!-- Accounts Table -->
   <section class="mb-6 sm:mb-8">
@@ -240,5 +315,5 @@
         </a>
       </li>
     </ul>
-  </section>
+   </section>
 </div>
