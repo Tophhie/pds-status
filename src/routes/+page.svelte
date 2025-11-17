@@ -73,114 +73,170 @@ onMount(async () => {
 
 </script>
 
-<div class="min-h-screen bg-[#100235] text-gray-100 p-15">
+<div class="min-h-screen bg-[#100235] text-gray-100 p-4 sm:p-6 md:p-8 lg:p-12">
   <!-- Page Header -->
    <img
     src="https://blob.tophhie.cloud/tophhiecloud-resources/Logos/tophhiecloud-white.png"
     height="50"
     alt="Tophhie Social Logo"
     id="Logo"
-    style="max-height:50px; display:block; margin-bottom:20px;"
+    class="h-8 sm:h-10 md:h-12 w-auto mb-4 sm:mb-6"
   />
-  <h1 class="text-2xl font-bold mb-4">Tophhie Social Server Status</h1>
+  <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8">Tophhie Social Server Status</h1>
 
   <!-- Service Information -->
-  <section class="mb-8">
-    <h2 class="text-xl font-semibold mb-4">Service Information</h2>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center bg-gray-800 p-4 rounded-lg">
-      <div>
-        <p class="text-gray-400 text-xs">Service Reachable</p>
-        <p class="font-semibold">{pdsHealth?.version != null ? "✅" : "❌"}</p>
+  <section class="mb-6 sm:mb-8">
+    <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Service Information</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 bg-gray-800 p-3 sm:p-4 rounded-lg">
+      <div class="text-center">
+        <p class="text-gray-400 text-xs sm:text-sm mb-1">Service Reachable</p>
+        <p class="font-semibold text-sm sm:text-base">{pdsHealth?.version != null ? "✅" : "❌"}</p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">PDS Version</p>
-        <p class="font-semibold">{pdsHealth?.version ?? 'Loading...'}</p>
+      <div class="text-center">
+        <p class="text-gray-400 text-xs sm:text-sm mb-1">PDS Version</p>
+        <p class="font-semibold text-sm sm:text-base break-words">{pdsHealth?.version ?? 'Loading...'}</p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">Server DID</p>
-        <p class="font-semibold">{pdsDescription?.did ?? 'Loading...'}</p>
+      <div class="text-center col-span-2 sm:col-span-1">
+        <p class="text-gray-400 text-xs sm:text-sm mb-1">Server DID</p>
+        <p class="font-semibold text-xs sm:text-sm break-all">{pdsDescription?.did ?? 'Loading...'}</p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">No. of Accounts</p>
-        <p class="font-semibold">{accounts.length}</p>
+      <div class="text-center">
+        <p class="text-gray-400 text-xs sm:text-sm mb-1">No. of Accounts</p>
+        <p class="font-semibold text-sm sm:text-base">{accounts.length}</p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">Invite Required</p>
-        <p class="font-semibold">{pdsDescription?.inviteCodeRequired ? "Yes" : "No"}</p>
+      <div class="text-center">
+        <p class="text-gray-400 text-xs sm:text-sm mb-1">Invite Required</p>
+        <p class="font-semibold text-sm sm:text-base">{pdsDescription?.inviteCodeRequired ? "Yes" : "No"}</p>
       </div>
     </div>
   </section>
 
   <!-- Interesting Stats -->
-   <section class="mb-8">
-    <h2 class="text-xl font-semibold mb-4">Statistics</h2>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center bg-gray-800 p-4 rounded-lg">
-      <div class="relative group">
-          <!-- Tooltip container -->
-          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
-            Total Bluesky posts created on tophhie.social in the current year. Data may be stale or cached for up to 1 hour.
-            <!-- Arrow pointing down -->
-            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
-          </div>
-        <p class="text-gray-400 text-xs">Total Bluesky Posts for {(new Date()).getFullYear()} <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
-        <p class="font-semibold">{totalPostsThisYear}</p>
+<!-- Interesting Stats -->
+<section class="mb-6 sm:mb-8">
+  <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Statistics</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 text-center bg-gray-800 p-3 sm:p-4 rounded-lg">
+    
+    <!-- Total Posts -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Total Bluesky posts created on tophhie.social in the current year. Data may be stale or cached for up to 1 hour.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
-      <div class="relative group">
-          <!-- Tooltip container -->
-          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
-            Data may be stale or cached for up to 1 hour
-            <!-- Arrow pointing down -->
-            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
-          </div>
-        <p class="text-gray-400 text-xs">Cloudflare R2 Blob Usage <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
-        <p class="font-semibold">{r2StorageUsage}</p>
-      </div>
-      <div class="relative group">
-          <!-- Tooltip container -->
-          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
-            Uptime may be stale or cached for up to 10 minutes.
-            <!-- Arrow pointing down -->
-            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
-          </div>
-        <p class="text-gray-400 text-xs">Uptime for last month <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
-        <p class="font-semibold" class:text-red-500={previousMonthUptimeValue < 99.9} class:text-green-500={previousMonthUptimeValue >= 99.9}>
-            {previousMonthUptime}
-        </p>
-      </div>
-      <div class="relative group">
-          <!-- Tooltip container -->
-          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
-            Uptime may be stale or cached for up to 10 minutes.
-            <!-- Arrow pointing down -->
-            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
-          </div>
-        <p class="text-gray-400 text-xs">Uptime for this month <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
-        <p class="font-semibold" class:text-red-500={currentMonthUptimeValue < 99.9} class:text-green-500={currentMonthUptimeValue >= 99.9}>
-            {currentMonthUptime}
-        </p>
-      </div>
-      <div class="relative group">
-          <!-- Tooltip container -->
-          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
-            Uptime may be stale or cached for up to 10 minutes.
-            <!-- Arrow pointing down -->
-            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
-          </div>
-        <p class="text-gray-400 text-xs">Total Downtime This Month <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
-        <p class="font-semibold">{totalDowntimeThisMonth}</p>
-      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Total Bluesky Posts for {(new Date()).getFullYear()} 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base">{totalPostsThisYear}</p>
     </div>
-  </section>
+
+    <!-- Cloudflare R2 Usage -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Data may be stale or cached for up to 1 hour
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Cloudflare R2 Blob Usage 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base">{r2StorageUsage}</p>
+    </div>
+
+    <!-- Uptime Last Month -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Uptime may be stale or cached for up to 10 minutes.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Uptime for last month 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base" class:text-red-500={previousMonthUptimeValue < 99.9} class:text-green-500={previousMonthUptimeValue >= 99.9}>
+        {previousMonthUptime}
+      </p>
+    </div>
+
+    <!-- Uptime This Month -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Uptime may be stale or cached for up to 10 minutes.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Uptime for this month 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base" class:text-red-500={currentMonthUptimeValue < 99.9} class:text-green-500={currentMonthUptimeValue >= 99.9}>
+        {currentMonthUptime}
+      </p>
+    </div>
+
+    <!-- Total Downtime -->
+    <div class="relative group">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Uptime may be stale or cached for up to 10 minutes.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Total Downtime This Month 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+      <p class="font-semibold text-sm sm:text-base">{totalDowntimeThisMonth}</p>
+    </div>
+
+  </div>
+</section>
 
   <!-- Accounts Table -->
-  <section>
-    <h2 class="text-xl font-semibold mb-4">Accounts on tophhie.social</h2>
-    <div class="text-sm text-gray-400 mb-2">
-      <p>
+  <section class="mb-6 sm:mb-8">
+    <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Accounts on tophhie.social</h2>
+    <div class="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">
+      <p class="break-words">
         <strong>Available User Domains:</strong> {pdsDescription?.availableUserDomains.join(", ")}
       </p>
     </div>
-    <div class="overflow-x-auto">
+    
+    <!-- Mobile Card View (shown on small screens) -->
+    <div class="block sm:hidden space-y-3">
+      {#each accounts as acc}
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="mb-2">
+            <p class="text-xs text-gray-400 mb-1">DID</p>
+            <p class="text-sm break-all">{acc.did}</p>
+          </div>
+          <div class="mb-2">
+            <p class="text-xs text-gray-400 mb-1">Handle</p>
+            {#await getHandleFromDid(acc.did)}
+              <p class="text-sm">Loading...</p>
+            {:then handle}
+              <p class="text-sm">{handle}</p>
+            {:catch error}
+              <p class="text-sm text-red-400">Error loading handle</p>
+            {/await}
+          </div>
+          <div>
+            <a 
+              href="https://plc.directory/{acc.did}" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm py-2"
+              title="Open PLC Directory"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M14 3h7v7h-2V6.41l-9.29 9.29-1.42-1.42L17.59 5H14V3z"/>
+                <path d="M5 5h7v2H7v10h10v-5h2v7H5V5z"/>
+              </svg>
+              <span>View in PLC Directory</span>
+            </a>
+          </div>
+        </div>
+      {/each}
+    </div>
+
+    <!-- Desktop Table View (hidden on small screens) -->
+    <div class="hidden sm:block overflow-x-auto">
       <table class="min-w-full text-sm border border-gray-700 rounded-lg">
         <thead class="bg-gray-800 text-gray-300">
           <tr>
@@ -192,16 +248,23 @@ onMount(async () => {
         <tbody>
           {#each accounts as acc}
             <tr class="border-t border-gray-700 hover:bg-gray-800">
-              <td class="px-4 py-2">{acc.did}</td>
+              <td class="px-4 py-2 break-all">{acc.did}</td>
               {#await getHandleFromDid(acc.did)}
-                <td>Loading...</td>
+                <td class="px-4 py-2">Loading...</td>
               {:then handle}
-                <td>{handle}</td>
+                <td class="px-4 py-2">{handle}</td>
               {:catch error}
-                <td>Error</td>
+                <td class="px-4 py-2 text-red-400">Error</td>
               {/await}
               <td class="px-4 py-2">
-                <a href="https://plc.directory/{acc.did}" target="_blank" title="Open PLC Directory">
+                <a 
+                  href="https://plc.directory/{acc.did}" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="inline-block p-2 hover:bg-gray-700 rounded transition-colors" 
+                  title="Open PLC Directory"
+                  aria-label="Open PLC Directory for {acc.did}"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M14 3h7v7h-2V6.41l-9.29 9.29-1.42-1.42L17.59 5H14V3z"/>
                     <path d="M5 5h7v2H7v10h10v-5h2v7H5V5z"/>
@@ -216,31 +279,41 @@ onMount(async () => {
   </section>
 
   <!-- Contact -->
-    <section>
-      <h2 class="text-xl font-semibold mb-4 mt-8">Contact</h2>
-      {#if pdsDescription?.contact.email}
-        <p class="text-sm">For support or enquiries, please contact us at <a href="mailto:{pdsDescription?.contact.email}" class="text-blue-400 hover:underline">{pdsDescription?.contact.email}</a>.</p>
-      {/if}
-    </section>
+  <section class="mb-6 sm:mb-8">
+    <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Contact</h2>
+    {#if pdsDescription?.contact.email}
+      <p class="text-xs sm:text-sm break-words">
+        For support or enquiries, please contact us at 
+        <a 
+          href="mailto:{pdsDescription?.contact.email}" 
+          class="text-blue-400 hover:text-blue-300 underline inline-block py-1"
+        >
+          {pdsDescription?.contact.email}
+        </a>.
+      </p>
+    {/if}
+  </section>
 
   <!-- Links -->
-   <section>
-    <h2 class="text-xl font-semibold mb-4 mt-8">Links</h2>
-    <ul class="list-disc list-inside">
-      <li><a href="{pdsDescription?.links.privacyPolicy}" class="text-blue-400 hover:underline">Privacy Policy</a></li>
-      <li><a href="{pdsDescription?.links.termsOfService}" class="text-blue-400 hover:underline">Terms of Service</a></li>
+  <section class="mb-6 sm:mb-8">
+    <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Links</h2>
+    <ul class="space-y-2">
+      <li>
+        <a 
+          href="{pdsDescription?.links.privacyPolicy}" 
+          class="text-blue-400 hover:text-blue-300 underline text-sm sm:text-base inline-block py-1"
+        >
+          Privacy Policy
+        </a>
+      </li>
+      <li>
+        <a 
+          href="{pdsDescription?.links.termsOfService}" 
+          class="text-blue-400 hover:text-blue-300 underline text-sm sm:text-base inline-block py-1"
+        >
+          Terms of Service
+        </a>
+      </li>
     </ul>
    </section>
-
-  <!-- Footer -->
-  <footer class="mt-12 pt-8 border-t border-gray-700 text-center">
-    <p class="text-sm text-gray-400">
-      <a href="https://github.com/Tophhie/pds-status" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline inline-flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-        View Source Code
-      </a>
-    </p>
-  </footer>
 </div>

@@ -13,6 +13,8 @@
 /* Global body styles */
 body {
   font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
@@ -49,4 +51,28 @@ footer {
 
 .status-offline {
   color: var(--error-color);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Improve tap targets on mobile */
+  a, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text from being too small */
+  body {
+    font-size: 16px; /* Prevents iOS zoom on input focus */
+  }
+  
+  /* Better touch scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Ensure links are easily tappable */
+a {
+  -webkit-tap-highlight-color: rgba(37, 99, 235, 0.3);
 }
