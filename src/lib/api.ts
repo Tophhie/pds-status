@@ -65,7 +65,7 @@ const getUptimeForMonth = async (offset: number = 0): Promise<any> => {
     return data;
 }
 
-export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration };
+export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear };
 
 // Helper Functions
 
@@ -87,24 +87,6 @@ function formatBlobUsageResponse(data: { usageBytes: string }): string {
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
-function getCurrentMonthRange(): { firstDay: string; lastDay: string } {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth(); // 0-based index
-
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-
-    const formatDate = (date: Date): string => {
-        return date.toISOString().split('T')[0]; // yyyy-MM-dd
-    };
-
-    return {
-        firstDay: formatDate(firstDay),
-        lastDay: formatDate(lastDay)
-    };
-}
-
 function getMonthRange(offset: number = 0): { firstDay: string; lastDay: string } {
     // offset = 0 → current month, offset = -1 → previous month, offset = 1 → next month, etc.
     const now = new Date();
@@ -122,6 +104,20 @@ function getMonthRange(offset: number = 0): { firstDay: string; lastDay: string 
         firstDay: formatDate(firstDay),
         lastDay: formatDate(lastDay)
     };
+}
+
+function getMonthNameYear(offset: number = 0): string {
+    // offset = 0 → current month, offset = -1 → previous month, offset = 1 → next month, etc.
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + offset;
+
+    // Create a date object for the target month
+    const targetDate = new Date(year, month, 1);
+
+    // Format as "Month-Name Year"
+    const formatter = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' });
+    return formatter.format(targetDate); // e.g., "December 2025"
 }
 
 function formatDuration(seconds: number): string {

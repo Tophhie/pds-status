@@ -10,7 +10,8 @@
     getTotalPostsThisYear,
     getBlobUsageFromPDS,
     getUptimeForMonth,
-    formatDuration
+    formatDuration,
+    getMonthNameYear
   } from '$lib/api';
   import type { Repo } from '@atproto/api/dist/client/types/com/atproto/sync/listRepos';
 
@@ -139,7 +140,7 @@ onMount(async () => {
     <!-- Uptime Last Month -->
     <div class="relative group" tabindex="0" role="link">
       <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
-        Uptime may be stale or cached for up to 10 minutes.
+        {getMonthNameYear(-1)} • Uptime may be stale or cached for up to 10 minutes.
         <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
       <p class="text-gray-400 text-xs sm:text-sm mb-1">
@@ -154,7 +155,7 @@ onMount(async () => {
     <!-- Uptime This Month -->
     <div class="relative group" tabindex="0" role="link">
       <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
-        Uptime may be stale or cached for up to 10 minutes.
+        {getMonthNameYear(0)} • Uptime may be stale or cached for up to 10 minutes.
         <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
       <p class="text-gray-400 text-xs sm:text-sm mb-1">
