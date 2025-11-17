@@ -58,7 +58,14 @@ const getBlobUsageFromPDS = async (): Promise<string> => {
     return formatBlobUsageResponse(data);
 }
 
-export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS };
+const getUptimeForMonth = async (offset: number = 0): Promise<any> => {
+    const { firstDay, lastDay } = getMonthRange(offset);
+    const response = await fetch(`${Config.TOPHHIE_CLOUD_API_URL}/pds/uptimeStats?startDate=${firstDay}&endDate=${lastDay}`);
+    const data = await response.json();
+    return data;
+}
+
+export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration };
 
 // Helper Functions
 
@@ -78,4 +85,60 @@ function formatBlobUsageResponse(data: { usageBytes: string }): string {
   }
 
   return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
+
+function getCurrentMonthRange(): { firstDay: string; lastDay: string } {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); // 0-based index
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const formatDate = (date: Date): string => {
+        return date.toISOString().split('T')[0]; // yyyy-MM-dd
+    };
+
+    return {
+        firstDay: formatDate(firstDay),
+        lastDay: formatDate(lastDay)
+    };
+}
+
+function getMonthRange(offset: number = 0): { firstDay: string; lastDay: string } {
+    // offset = 0 → current month, offset = -1 → previous month, offset = 1 → next month, etc.
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + offset;
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const formatDate = (date: Date): string => {
+        return date.toISOString().split('T')[0]; // yyyy-MM-dd
+    };
+
+    return {
+        firstDay: formatDate(firstDay),
+        lastDay: formatDate(lastDay)
+    };
+}
+
+function formatDuration(seconds: number): string {
+    if (seconds < 60) {
+        return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) {
+        return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) {
+        return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+
+    const days = Math.floor(hours / 24);
+    return `${days} day${days !== 1 ? 's' : ''}`;
 }

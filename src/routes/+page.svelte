@@ -5,7 +5,9 @@
   getDescriptionFromPDS, 
   getHandleFromDid,
   getTotalPostsThisYear,
-  getBlobUsageFromPDS } from '$lib/api';
+  getBlobUsageFromPDS,
+  getUptimeForMonth,
+  formatDuration } from '$lib/api';
 	import type { Repo } from '@atproto/api/dist/client/types/com/atproto/sync/listRepos';
 
   let metrics = {
@@ -23,42 +25,50 @@
   let r2StorageUsage: string = 'Loading...';
   let totalPostsThisYear: number = 0;
 
-  onMount(async () => {
-    // Fetch accounts from PDS
-    try {
-      accounts = await getDidsFromPDS();
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
-    }
+  let currentMonthUptime: string = 'Loading...';
+  let currentMonthUptimeValue: number = 0;
+  let previousMonthUptime: string = 'Loading...';
+  let previousMonthUptimeValue: number = 0;
+  let totalDowntimeThisMonth: string = 'Loading...';
 
-    // Fetch PDS health metrics
-    try {
-      pdsHealth = await getHealthFromPDS();
-    } catch (error) {
-      console.error('Error fetching PDS health:', error);
-    }
+onMount(async () => {
+  try {
+    const [
+      accountsData,
+      pdsHealthData,
+      pdsDescriptionData,
+      totalPostsData,
+      r2StorageData,
+      currentMonthData,
+      previousMonthData
+    ] = await Promise.all([
+      getDidsFromPDS(),
+      getHealthFromPDS(),
+      getDescriptionFromPDS(),
+      getTotalPostsThisYear(),
+      getBlobUsageFromPDS(),
+      getUptimeForMonth(0),
+      getUptimeForMonth(-1)
+    ]);
 
-    // Fetch PDS description
-    try {
-      pdsDescription = await getDescriptionFromPDS();
-    } catch (error) {
-      console.error('Error fetching PDS description:', error);
-    }
+    // Assign results
+    accounts = accountsData;
+    pdsHealth = pdsHealthData;
+    pdsDescription = pdsDescriptionData;
+    totalPostsThisYear = totalPostsData;
+    r2StorageUsage = r2StorageData;
 
-    // Fetch total posts this year
-    try {
-      totalPostsThisYear = await getTotalPostsThisYear();
-    } catch (error) {
-      console.error('Error fetching total posts this year:', error);
-    }
+    currentMonthUptime = `${currentMonthData.availability.toFixed(2)}%`;
+    currentMonthUptimeValue = currentMonthData.availability.toFixed(2);
+    previousMonthUptime = `${previousMonthData.availability.toFixed(2)}%`;
+    previousMonthUptimeValue = previousMonthData.availability.toFixed(2);
+    totalDowntimeThisMonth = formatDuration(currentMonthData.total_downtime);
 
-    // Fetch R2 Storage Usage
-    try {
-      r2StorageUsage = await getBlobUsageFromPDS();
-    } catch (error) {
-      console.error('Error fetching R2 storage usage:', error);
-    }
-  });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+});
+
 </script>
 
 <div class="min-h-screen bg-[#100235] text-gray-100 p-15">
@@ -110,6 +120,22 @@
       <div>
         <p class="text-gray-400 text-xs">Cloudflare R2 Blob Usage</p>
         <p class="font-semibold">{r2StorageUsage}</p>
+      </div>
+      <div>
+        <p class="text-gray-400 text-xs">Uptime for last month</p>
+        <p class="font-semibold" class:text-red-500={previousMonthUptimeValue < 99.9} class:text-green-500={previousMonthUptimeValue >= 99.9}>
+            {previousMonthUptime}
+        </p>
+      </div>
+      <div>
+        <p class="text-gray-400 text-xs">Uptime for this month</p>
+        <p class="font-semibold" class:text-red-500={currentMonthUptimeValue < 99.9} class:text-green-500={currentMonthUptimeValue >= 99.9}>
+            {currentMonthUptime}
+        </p>
+      </div>
+      <div>
+        <p class="text-gray-400 text-xs">Total Downtime This Month</p>
+        <p class="font-semibold">{totalDowntimeThisMonth}</p>
       </div>
     </div>
   </section>
