@@ -2,75 +2,84 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getDidsFromPDS, 
-  getHealthFromPDS, 
-  getDescriptionFromPDS, 
-  getHandleFromDid,
-  getTotalPostsThisYear,
-  getBlobUsageFromPDS,
-  getUptimeForMonth,
-  formatDuration } from '$lib/api';
-	import type { Repo } from '@atproto/api/dist/client/types/com/atproto/sync/listRepos';
-
-  let metrics = {
-    load: '0.00 / 0.00 / 0.00',
-    cpu: '0.0%',
-    mem: '611.8 MB / 3.7 GB',
-    net: '3.4 GB / 1.9 GB',
-    diskUsed: '2.3 GB',
-    diskFree: '28.2 GB'
-  };
+  import {
+    getDidsFromPDS,
+    getHealthFromPDS,
+    getDescriptionFromPDS,
+    getHandleFromDid,
+    getTotalPostsThisYear,
+    getBlobUsageFromPDS,
+    getUptimeForMonth,
+    formatDuration
+  } from '$lib/api';
+  import type { Repo } from '@atproto/api/dist/client/types/com/atproto/sync/listRepos';
 
   let accounts: Repo[] = [];
   let pdsHealth: any;
   let pdsDescription: any;
-  let r2StorageUsage: string = 'Loading...';
-  let totalPostsThisYear: number = 0;
+  let r2StorageUsage = 'Loading...';
+  let totalPostsThisYear = 0;
 
-  let currentMonthUptime: string = 'Loading...';
-  let currentMonthUptimeValue: number = 0;
-  let previousMonthUptime: string = 'Loading...';
-  let previousMonthUptimeValue: number = 0;
-  let totalDowntimeThisMonth: string = 'Loading...';
+  let currentMonthUptime = 'Loading...';
+  let currentMonthUptimeValue = 0;
+  let previousMonthUptime = 'Loading...';
+  let previousMonthUptimeValue = 0;
+  let totalDowntimeThisMonth = 'Loading...';
 
-onMount(async () => {
-  try {
-    const [
-      accountsData,
-      pdsHealthData,
-      pdsDescriptionData,
-      totalPostsData,
-      r2StorageData,
-      currentMonthData,
-      previousMonthData
-    ] = await Promise.all([
-      getDidsFromPDS(),
-      getHealthFromPDS(),
-      getDescriptionFromPDS(),
-      getTotalPostsThisYear(),
-      getBlobUsageFromPDS(),
-      getUptimeForMonth(0),
-      getUptimeForMonth(-1)
-    ]);
+  // ✅ Caches for handle and blob usage
+  let handleCache: Record<string, string> = {};
+  let blobUsageCache: Record<string, string> = {};
 
-    // Assign results
-    accounts = accountsData;
-    pdsHealth = pdsHealthData;
-    pdsDescription = pdsDescriptionData;
-    totalPostsThisYear = totalPostsData;
-    r2StorageUsage = r2StorageData;
+  onMount(async () => {
+    try {
+      const [
+        accountsData,
+        pdsHealthData,
+        pdsDescriptionData,
+        totalPostsData,
+        r2StorageData,
+        currentMonthData,
+        previousMonthData
+      ] = await Promise.all([
+        getDidsFromPDS(),
+        getHealthFromPDS(),
+        getDescriptionFromPDS(),
+        getTotalPostsThisYear(),
+        getBlobUsageFromPDS(),
+        getUptimeForMonth(0),
+        getUptimeForMonth(-1)
+      ]);
 
-    currentMonthUptime = `${currentMonthData.availability.toFixed(2)}%`;
-    currentMonthUptimeValue = currentMonthData.availability.toFixed(2);
-    previousMonthUptime = `${previousMonthData.availability.toFixed(2)}%`;
-    previousMonthUptimeValue = previousMonthData.availability.toFixed(2);
-    totalDowntimeThisMonth = formatDuration(currentMonthData.total_downtime);
+      accounts = accountsData;
+      pdsHealth = pdsHealthData;
+      pdsDescription = pdsDescriptionData;
+      totalPostsThisYear = totalPostsData;
+      r2StorageUsage = r2StorageData;
 
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-});
+      currentMonthUptime = `${currentMonthData.availability.toFixed(2)}%`;
+      currentMonthUptimeValue = currentMonthData.availability;
+      previousMonthUptime = `${previousMonthData.availability.toFixed(2)}%`;
+      previousMonthUptimeValue = previousMonthData.availability;
+      totalDowntimeThisMonth = formatDuration(currentMonthData.total_downtime);
 
+      await Promise.all(
+        accounts.map(async (acc) => {
+          try {
+            handleCache[acc.did] = await getHandleFromDid(acc.did);
+          } catch {
+            handleCache[acc.did] = 'Error';
+          }
+          try {
+            blobUsageCache[acc.did] = await getBlobUsageFromPDS(acc.did);
+          } catch {
+            blobUsageCache[acc.did] = '0 KB';
+          }
+        })
+      );
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  });
 </script>
 
 <div class="min-h-screen bg-[#100235] text-gray-100 p-4 sm:p-6 md:p-8 lg:p-12">
@@ -208,13 +217,11 @@ onMount(async () => {
           </div>
           <div class="mb-2">
             <p class="text-xs text-gray-400 mb-1">Handle</p>
-            {#await getHandleFromDid(acc.did)}
-              <p class="text-sm">Loading...</p>
-            {:then handle}
-              <p class="text-sm">{handle}</p>
-            {:catch error}
-              <p class="text-sm text-red-400">Error loading handle</p>
-            {/await}
+            <p class="text-sm">{handleCache[acc.did] ?? 'Loading...'}</p>
+          </div>
+          <div class="mb-2">
+            <p class="text-xs text-gray-400 mb-1">Blob Usage</p>
+            <p class="text-sm">{blobUsageCache[acc.did] ?? 'Loading...'}</p>
           </div>
           <div>
             <a 
@@ -242,6 +249,7 @@ onMount(async () => {
           <tr>
             <th class="px-4 py-2 text-left">DID</th>
             <th class="px-4 py-2 text-left">Handle</th>
+            <th class="px-4 py-2 text-left">Blob Usage</th>
             <th class="px-4 py-2 text-left">PLC Directory</th>
           </tr>
         </thead>
@@ -249,13 +257,8 @@ onMount(async () => {
           {#each accounts as acc}
             <tr class="border-t border-gray-700 hover:bg-gray-800">
               <td class="px-4 py-2 break-all">{acc.did}</td>
-              {#await getHandleFromDid(acc.did)}
-                <td class="px-4 py-2">Loading...</td>
-              {:then handle}
-                <td class="px-4 py-2">{handle}</td>
-              {:catch error}
-                <td class="px-4 py-2 text-red-400">Error</td>
-              {/await}
+              <td class="px-4 py-2">{handleCache[acc.did] ?? 'Loading...'}</td>
+              <td class="px-4 py-2">{blobUsageCache[acc.did] ?? 'Loading...'}</td>
               <td class="px-4 py-2">
                 <a 
                   href="https://plc.directory/{acc.did}" 

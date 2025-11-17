@@ -52,8 +52,8 @@ const getTotalPostsThisYear = async (): Promise<any> => {
     return getTotalSum(data);
 }
 
-const getBlobUsageFromPDS = async (): Promise<string> => {
-    const response = await fetch(`${Config.TOPHHIE_CLOUD_API_URL}/pds/blobStorageUsageBytes`);
+const getBlobUsageFromPDS = async (did: string = ""): Promise<string> => {
+    const response = await fetch(`${Config.TOPHHIE_CLOUD_API_URL}/pds/blobStorageUsageBytes/${did}`);
     const data = await response.json();
     return formatBlobUsageResponse(data);
 }
