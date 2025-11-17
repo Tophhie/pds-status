@@ -30,56 +30,40 @@
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
 
-  onMount(async () => {
-    try {
-      const [
-        accountsData,
-        pdsHealthData,
-        pdsDescriptionData,
-        totalPostsData,
-        r2StorageData,
-        currentMonthData,
-        previousMonthData
-      ] = await Promise.all([
-        getDidsFromPDS(),
-        getHealthFromPDS(),
-        getDescriptionFromPDS(),
-        getTotalPostsThisYear(),
-        getBlobUsageFromPDS(),
-        getUptimeForMonth(0),
-        getUptimeForMonth(-1)
-      ]);
+onMount(async () => {
+  try {
+    const [accountsData, pdsHealthData, pdsDescriptionData] = await Promise.all([
+      getDidsFromPDS(),
+      getHealthFromPDS(),
+      getDescriptionFromPDS()
+    ]);
 
-      accounts = accountsData;
-      pdsHealth = pdsHealthData;
-      pdsDescription = pdsDescriptionData;
-      totalPostsThisYear = totalPostsData;
-      r2StorageUsage = r2StorageData;
+    accounts = accountsData;
+    pdsHealth = pdsHealthData;
+    pdsDescription = pdsDescriptionData;
 
-      currentMonthUptime = `${currentMonthData.availability.toFixed(2)}%`;
-      currentMonthUptimeValue = currentMonthData.availability;
-      previousMonthUptime = `${previousMonthData.availability.toFixed(2)}%`;
-      previousMonthUptimeValue = previousMonthData.availability;
-      totalDowntimeThisMonth = formatDuration(currentMonthData.total_downtime);
+    getBlobUsageFromPDS().then(data => r2StorageUsage = data);
+    getTotalPostsThisYear().then(posts => totalPostsThisYear = posts);
+    getUptimeForMonth(0).then(data => {
+      currentMonthUptime = `${data.availability.toFixed(2)}%`;
+      currentMonthUptimeValue = data.availability;
+      totalDowntimeThisMonth = formatDuration(data.total_downtime);
+    });
+    getUptimeForMonth(-1).then(data => {
+      previousMonthUptime = `${data.availability.toFixed(2)}%`;
+      previousMonthUptimeValue = data.availability;
+    });
 
-      await Promise.all(
-        accounts.map(async (acc) => {
-          try {
-            handleCache[acc.did] = await getHandleFromDid(acc.did);
-          } catch {
-            handleCache[acc.did] = 'Error';
-          }
-          try {
-            blobUsageCache[acc.did] = await getBlobUsageFromPDS(acc.did);
-          } catch {
-            blobUsageCache[acc.did] = '0 KB';
-          }
-        })
-      );
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  });
+    Promise.all(accounts.map(async acc => {
+      handleCache[acc.did] = await getHandleFromDid(acc.did).catch(() => 'Error');
+      blobUsageCache[acc.did] = await getBlobUsageFromPDS(acc.did).catch(() => '0 KB');
+    }));
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+});
+
+
 </script>
 
 <div class="min-h-screen bg-[#100235] text-gray-100 p-4 sm:p-6 md:p-8 lg:p-12">
