@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getDidsFromPDS, 
@@ -113,28 +115,58 @@ onMount(async () => {
    <section class="mb-8">
     <h2 class="text-xl font-semibold mb-4">Statistics</h2>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center bg-gray-800 p-4 rounded-lg">
-      <div>
-        <p class="text-gray-400 text-xs">Total Posts for {(new Date()).getFullYear()}</p>
+      <div class="relative group">
+          <!-- Tooltip container -->
+          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+            Total Bluesky posts created on tophhie.social in the current year. Data may be stale or cached for up to 1 hour.
+            <!-- Arrow pointing down -->
+            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+          </div>
+        <p class="text-gray-400 text-xs">Total Bluesky Posts for {(new Date()).getFullYear()} <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
         <p class="font-semibold">{totalPostsThisYear}</p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">Cloudflare R2 Blob Usage</p>
+      <div class="relative group">
+          <!-- Tooltip container -->
+          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+            Data may be stale or cached for up to 1 hour
+            <!-- Arrow pointing down -->
+            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+          </div>
+        <p class="text-gray-400 text-xs">Cloudflare R2 Blob Usage <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
         <p class="font-semibold">{r2StorageUsage}</p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">Uptime for last month</p>
+      <div class="relative group">
+          <!-- Tooltip container -->
+          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+            Uptime may be stale or cached for up to 10 minutes.
+            <!-- Arrow pointing down -->
+            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+          </div>
+        <p class="text-gray-400 text-xs">Uptime for last month <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
         <p class="font-semibold" class:text-red-500={previousMonthUptimeValue < 99.9} class:text-green-500={previousMonthUptimeValue >= 99.9}>
             {previousMonthUptime}
         </p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">Uptime for this month</p>
+      <div class="relative group">
+          <!-- Tooltip container -->
+          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+            Uptime may be stale or cached for up to 10 minutes.
+            <!-- Arrow pointing down -->
+            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+          </div>
+        <p class="text-gray-400 text-xs">Uptime for this month <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
         <p class="font-semibold" class:text-red-500={currentMonthUptimeValue < 99.9} class:text-green-500={currentMonthUptimeValue >= 99.9}>
             {currentMonthUptime}
         </p>
       </div>
-      <div>
-        <p class="text-gray-400 text-xs">Total Downtime This Month</p>
+      <div class="relative group">
+          <!-- Tooltip container -->
+          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+            Uptime may be stale or cached for up to 10 minutes.
+            <!-- Arrow pointing down -->
+            <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+          </div>
+        <p class="text-gray-400 text-xs">Total Downtime This Month <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i></p>
         <p class="font-semibold">{totalDowntimeThisMonth}</p>
       </div>
     </div>
