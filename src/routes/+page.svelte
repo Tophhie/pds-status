@@ -111,8 +111,8 @@ onMount(async () => {
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 text-center bg-gray-800 p-3 sm:p-4 rounded-lg">
     
     <!-- Total Posts -->
-    <div class="relative group">
-      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
         Total Bluesky posts created on tophhie.social in the current year. Data may be stale or cached for up to 1 hour.
         <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
@@ -124,8 +124,8 @@ onMount(async () => {
     </div>
 
     <!-- Cloudflare R2 Usage -->
-    <div class="relative group">
-      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
         Data may be stale or cached for up to 1 hour
         <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
@@ -137,8 +137,8 @@ onMount(async () => {
     </div>
 
     <!-- Uptime Last Month -->
-    <div class="relative group">
-      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
         Uptime may be stale or cached for up to 10 minutes.
         <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
@@ -152,8 +152,8 @@ onMount(async () => {
     </div>
 
     <!-- Uptime This Month -->
-    <div class="relative group">
-      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
         Uptime may be stale or cached for up to 10 minutes.
         <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
@@ -167,8 +167,8 @@ onMount(async () => {
     </div>
 
     <!-- Total Downtime -->
-    <div class="relative group">
-      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
         Uptime may be stale or cached for up to 10 minutes.
         <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
       </div>
