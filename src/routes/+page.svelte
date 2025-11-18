@@ -27,45 +27,114 @@
   let previousMonthUptimeValue = 0;
   let totalDowntimeThisMonth = 'Loading...';
 
-  // ✅ Caches for handle and blob usage
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
 
-onMount(async () => {
-  try {
-    const [accountsData, pdsHealthData, pdsDescriptionData] = await Promise.all([
-      getDidsFromPDS(),
-      getHealthFromPDS(),
-      getDescriptionFromPDS()
-    ]);
+  // Sorting state
+  let sortColumn: 'did' | 'handle' | 'blobUsage' | null = null;
+  let sortDirection: 'asc' | 'desc' = 'asc';
 
-    accounts = accountsData;
-    pdsHealth = pdsHealthData;
-    pdsDescription = pdsDescriptionData;
-
-    getBlobUsageFromPDS().then(data => r2StorageUsage = data);
-    getTotalPostsThisYear().then(posts => totalPostsThisYear = posts);
-    getUptimeForMonth(0).then(data => {
-      currentMonthUptime = `${data.availability.toFixed(2)}%`;
-      currentMonthUptimeValue = data.availability;
-      totalDowntimeThisMonth = formatDuration(data.total_downtime);
-    });
-    getUptimeForMonth(-1).then(data => {
-      previousMonthUptime = `${data.availability.toFixed(2)}%`;
-      previousMonthUptimeValue = data.availability;
-    });
-
-    Promise.all(accounts.map(async acc => {
-      handleCache[acc.did] = await getHandleFromDid(acc.did).catch(() => 'Error');
-      blobUsageCache[acc.did] = await getBlobUsageFromPDS(acc.did).catch(() => '0 KB');
-    }));
-  } catch (error) {
-    console.error('Error fetching data:', error);
+  function sortBy(column: 'did' | 'handle' | 'blobUsage') {
+    if (sortColumn === column) {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortColumn = column;
+      sortDirection = 'asc';
+    }
   }
-});
+
+  function resetSort() {
+    sortColumn = null;
+    sortDirection = 'asc';
+  }
 
 
+  function parseSize(size: string): number {
+    if (!size) return 0;
+
+    const match = size.match(/([\d.]+)\s*(KB|MB|GB)/i);
+    if (!match) return 0;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2].toUpperCase() as 'KB' | 'MB' | 'GB';
+
+    const multipliers: Record<'KB' | 'MB' | 'GB', number> = {
+      KB: 1,
+      MB: 1024,
+      GB: 1024 * 1024
+    };
+
+    return value * multipliers[unit];
+  }
+
+
+  // Reactive sorted list — now tied to handleCache + blobUsageCache
+  $: sortedAccounts = [...accounts].sort((a, b) => {
+    if (!sortColumn) return 0;
+
+    let valA: string | number = '';
+    let valB: string | number = '';
+
+    if (sortColumn === 'did') {
+      valA = a.did;
+      valB = b.did;
+    } else if (sortColumn === 'handle') {
+      valA = handleCache[a.did] ?? '';
+      valB = handleCache[b.did] ?? '';
+    } else if (sortColumn === 'blobUsage') {
+      valA = parseSize(blobUsageCache[a.did] ?? '0 KB');
+      valB = parseSize(blobUsageCache[b.did] ?? '0 KB');
+    }
+
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return sortDirection === 'asc' ? valA - valB : valB - valA;
+    }
+
+    return sortDirection === 'asc'
+      ? String(valA).localeCompare(String(valB))
+      : String(valB).localeCompare(String(valA));
+  });
+
+  onMount(async () => {
+    try {
+      const [accountsData, pdsHealthData, pdsDescriptionData] = await Promise.all([
+        getDidsFromPDS(),
+        getHealthFromPDS(),
+        getDescriptionFromPDS()
+      ]);
+
+      accounts = accountsData;
+      pdsHealth = pdsHealthData;
+      pdsDescription = pdsDescriptionData;
+
+      getBlobUsageFromPDS().then(data => r2StorageUsage = data);
+      getTotalPostsThisYear().then(posts => totalPostsThisYear = posts);
+
+      getUptimeForMonth(0).then(data => {
+        currentMonthUptime = `${data.availability.toFixed(2)}%`;
+        currentMonthUptimeValue = data.availability;
+        totalDowntimeThisMonth = formatDuration(data.total_downtime);
+      });
+
+      getUptimeForMonth(-1).then(data => {
+        previousMonthUptime = `${data.availability.toFixed(2)}%`;
+        previousMonthUptimeValue = data.availability;
+      });
+
+      // Fetch handles + blob usage properly and await them
+      await Promise.all(
+        accounts.map(async acc => {
+          handleCache[acc.did] = await getHandleFromDid(acc.did).catch(() => 'Error');
+          blobUsageCache[acc.did] = await getBlobUsageFromPDS(acc.did).catch(() => '0 KB');
+        })
+      );
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  });
 </script>
+
 
 <div class="min-h-screen bg-[#100235] text-gray-100 p-4 sm:p-6 md:p-8 lg:p-12">
   <!-- Page Header -->
@@ -187,10 +256,21 @@ onMount(async () => {
   <section class="mb-6 sm:mb-8">
     <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Accounts on tophhie.social</h2>
     <div class="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">
-      <p class="break-words">
-        <strong>Available User Domains:</strong> {pdsDescription?.availableUserDomains.join(", ")}
-      </p>
+      <div class="flex justify-between items-center">
+        <p class="break-words">
+          <strong>Available User Domains:</strong>
+          {pdsDescription?.availableUserDomains.join(", ")}
+        </p>
+
+        <button
+          class="ml-4 px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors whitespace-nowrap"
+          on:click={resetSort}
+        >
+          Reset Sort
+        </button>
+      </div>
     </div>
+
     
     <!-- Mobile Card View (shown on small screens) -->
     <div class="block sm:hidden space-y-3">
@@ -232,14 +312,48 @@ onMount(async () => {
       <table class="min-w-full text-sm border border-gray-700 rounded-lg">
         <thead class="bg-gray-800 text-gray-300">
           <tr>
-            <th class="px-4 py-2 text-left">DID</th>
-            <th class="px-4 py-2 text-left">Handle</th>
-            <th class="px-4 py-2 text-left">Blob Usage</th>
-            <th class="px-4 py-2 text-left">PLC Directory</th>
+            <!-- DID -->
+            <th 
+              class="px-4 py-2 text-left cursor-pointer select-none"
+              on:click={() => sortBy('did')}
+            >
+              DID 
+              {#if sortColumn === 'did'}
+                {sortDirection === 'asc' ? '▲' : '▼'}
+              {/if}
+            </th>
+
+            <!-- Handle -->
+            <th 
+              class="px-4 py-2 text-left cursor-pointer select-none"
+              on:click={() => sortBy('handle')}
+            >
+              Handle
+              {#if sortColumn === 'handle'}
+                {sortDirection === 'asc' ? '▲' : '▼'}
+              {/if}
+            </th>
+
+            <!-- Blob Usage -->
+            <th 
+              class="px-4 py-2 text-left cursor-pointer select-none"
+              on:click={() => sortBy('blobUsage')}
+            >
+              Blob Usage
+              {#if sortColumn === 'blobUsage'}
+                {sortDirection === 'asc' ? '▲' : '▼'}
+              {/if}
+            </th>
+
+            <!-- PLC Directory (not sortable) -->
+            <th class="px-4 py-2 text-left">
+              PLC Directory
+            </th>
           </tr>
         </thead>
+
         <tbody>
-          {#each accounts as acc}
+          {#each sortedAccounts as acc}
             <tr class="border-t border-gray-700 hover:bg-gray-800">
               <td class="px-4 py-2 break-all">{acc.did}</td>
               <td class="px-4 py-2">{handleCache[acc.did] ?? 'Loading...'}</td>
@@ -249,11 +363,13 @@ onMount(async () => {
                   href="https://plc.directory/{acc.did}" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  class="inline-block p-2 hover:bg-gray-700 rounded transition-colors" 
+                  class="inline-block p-2 hover:bg-gray-700 rounded transition-colors"
                   title="Open PLC Directory"
                   aria-label="Open PLC Directory for {acc.did}"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" 
+                    width="24" height="24" viewBox="0 0 24 24" 
+                    fill="currentColor" aria-hidden="true">
                     <path d="M14 3h7v7h-2V6.41l-9.29 9.29-1.42-1.42L17.59 5H14V3z"/>
                     <path d="M5 5h7v2H7v10h10v-5h2v7H5V5z"/>
                   </svg>
@@ -264,7 +380,7 @@ onMount(async () => {
         </tbody>
       </table>
     </div>
-  </section>
+
 
   <!-- Contact -->
   <section class="mb-6 sm:mb-8">
