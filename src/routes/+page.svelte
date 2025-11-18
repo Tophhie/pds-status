@@ -48,6 +48,38 @@
     sortDirection = 'asc';
   }
 
+  function exportTableToCSV() {
+    if (!accounts.length) return;
+
+    // CSV headers
+    const headers = ['DID', 'Handle', 'Blob Usage', 'PLC Directory'];
+
+    // CSV rows
+    const rows = sortedAccounts.map(acc => [
+      acc.did,
+      handleCache[acc.did] ?? '',
+      blobUsageCache[acc.did] ?? '',
+      `https://plc.directory/${acc.did}`
+    ]);
+
+    // Combine headers + rows
+    const csvContent =
+      [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+    // Create blob and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'accounts.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 
   function parseSize(size: string): number {
     if (!size) return 0;
@@ -174,7 +206,6 @@
     </div>
   </section>
 
-  <!-- Interesting Stats -->
 <!-- Interesting Stats -->
 <section class="mb-6 sm:mb-8">
   <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Statistics</h2>
@@ -262,12 +293,21 @@
           {pdsDescription?.availableUserDomains.join(", ")}
         </p>
 
-        <button
-          class="ml-4 px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors whitespace-nowrap"
-          on:click={resetSort}
-        >
-          Reset Sort
-        </button>
+        <!-- Button group -->
+        <div class="flex space-x-2">
+          <button
+            class="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors whitespace-nowrap"
+            on:click={exportTableToCSV}
+          >
+            Export CSV
+          </button>
+          <button
+            class="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors whitespace-nowrap"
+            on:click={resetSort}
+          >
+            Reset Sort
+          </button>
+        </div>
       </div>
     </div>
 
