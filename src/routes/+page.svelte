@@ -270,6 +270,7 @@
         </button>
       </div>
     </div>
+  </section>
 
     
     <!-- Mobile Card View (shown on small screens) -->
