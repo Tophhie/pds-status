@@ -294,7 +294,7 @@
         </p>
 
         <!-- Button group -->
-        <div class="flex space-x-2">
+        <div class="flex space-x-2 hidden sm:block">
           <button
             class="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors whitespace-nowrap"
             on:click={exportTableToCSV}
