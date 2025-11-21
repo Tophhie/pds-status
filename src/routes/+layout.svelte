@@ -7,6 +7,7 @@
 <svelte:head>
 	<title>Tophhie Social Server Status</title>
 	<link rel="icon" href={favicon} />
+	<meta name="theme-color" content="#100235" >
 </svelte:head>
 
 {@render children()}
