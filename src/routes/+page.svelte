@@ -2,6 +2,7 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { fade } from 'svelte/transition';
   import {
     getDidsFromPDS,
     getHealthFromPDS,
@@ -14,6 +15,9 @@
     getMonthNameYear
   } from '$lib/api';
   import type { Repo } from '@atproto/api/dist/client/types/com/atproto/sync/listRepos';
+
+  let showBanner: boolean = false;
+  let bannerMsg: string | null = null
 
   let accounts: Repo[] = [];
   let pdsHealth: any;
@@ -46,6 +50,19 @@
   function resetSort() {
     sortColumn = null;
     sortDirection = 'asc';
+  }
+
+  function copyRepoToClipboard(a: Repo) {
+    navigator.clipboard.writeText(JSON.stringify(a)).then(() => { 
+      bannerMsg = "Copied to your clipboard!"
+    }, function(err) {
+      bannerMsg = "Failed to copy to clipboard..."
+    })
+
+    showBanner = true
+    setTimeout(() => {
+      showBanner = false
+    }, 5000)    
   }
 
   function exportTableToCSV() {
@@ -167,6 +184,14 @@
   });
 </script>
 
+{#if showBanner}
+  <div
+    class="fixed top-4 right-4 bg-purple-600 text-white px-4 py-2 rounded shadow-lg"
+    transition:fade
+  >
+    {bannerMsg}
+  </div>
+{/if}
 
 <div class="min-h-screen bg-[#100235] text-gray-100 p-4 sm:p-6 md:p-8 lg:p-12">
   <!-- Page Header -->
@@ -419,6 +444,9 @@
             <th class="px-4 py-2 text-left">
               PLC Directory
             </th>
+            <th class="px-4 py-2 text-left">
+              Copy Repo Info
+            </th>
           </tr>
         </thead>
 
@@ -437,13 +465,13 @@
                   title="Open PLC Directory"
                   aria-label="Open PLC Directory for {acc.did}"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" 
-                    width="24" height="24" viewBox="0 0 24 24" 
-                    fill="currentColor" aria-hidden="true">
-                    <path d="M14 3h7v7h-2V6.41l-9.29 9.29-1.42-1.42L17.59 5H14V3z"/>
-                    <path d="M5 5h7v2H7v10h10v-5h2v7H5V5z"/>
-                  </svg>
+                  <i class="fa fa-solid fa-external-link fa-lg"></i>
                 </a>
+              </td>
+              <td class="px-4 py-2">
+                <button on:click={() => copyRepoToClipboard(acc)} aria-label="Copy repo info" style="cursor: pointer;">
+                  <i class="fa fa-regular fa-copy fa-lg inline-block p-2 hover:bg-gray-700 rounded transition-colors" style="color: white;"></i>
+                </button>
               </td>
             </tr>
           {/each}
