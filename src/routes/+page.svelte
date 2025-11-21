@@ -18,14 +18,14 @@
   let accounts: Repo[] = [];
   let pdsHealth: any;
   let pdsDescription: any;
-  let r2StorageUsage = 'Loading...';
-  let totalPostsThisYear = 0;
+  let r2StorageUsage: string | null = null;
+  let totalPostsThisYear: number | null = null;
 
-  let currentMonthUptime = 'Loading...';
+  let currentMonthUptime: string | null = null;
   let currentMonthUptimeValue = 0;
-  let previousMonthUptime = 'Loading...';
+  let previousMonthUptime: string | null = null;
   let previousMonthUptimeValue = 0;
-  let totalDowntimeThisMonth = 'Loading...';
+  let totalDowntimeThisMonth: string | null = null;
 
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
@@ -139,8 +139,8 @@
       pdsHealth = pdsHealthData;
       pdsDescription = pdsDescriptionData;
 
-      getBlobUsageFromPDS().then(data => r2StorageUsage = data);
-      getTotalPostsThisYear().then(posts => totalPostsThisYear = posts);
+      getBlobUsageFromPDS().then(data => r2StorageUsage = data ?? '0 KB');
+      getTotalPostsThisYear().then(posts => totalPostsThisYear = posts ?? 0);
 
       getUptimeForMonth(0).then(data => {
         currentMonthUptime = `${data.availability.toFixed(2)}%`;
@@ -185,7 +185,11 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 bg-gray-800 p-3 sm:p-4 rounded-lg">
       <div class="text-center">
         <p class="text-gray-400 text-xs sm:text-sm mb-1">Service Reachable</p>
-        <p class="font-semibold text-sm sm:text-base">{pdsHealth?.version != null ? "✅" : "❌"}</p>
+        {#if pdsHealth?.version != null}
+            <i class="fa fa-solid fa-check fa-lg" style="color: #63E6BE;"></i>
+        {:else}
+            <i class="fa fa-times fa-lg" style="color: #ff0000;"></i>
+        {/if}
       </div>
       <div class="text-center">
         <p class="text-gray-400 text-xs sm:text-sm mb-1">PDS Version</p>
@@ -221,7 +225,13 @@
         Total Bluesky Posts for {(new Date()).getFullYear()} 
         <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
       </p>
-      <p class="font-semibold text-sm sm:text-base">{totalPostsThisYear}</p>
+        <p class="font-semibold text-sm sm:text-base" aria-busy="{totalPostsThisYear === null}">
+          {#if totalPostsThisYear === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {totalPostsThisYear}
+          {/if}
+        </p>
     </div>
 
     <!-- Cloudflare R2 Usage -->
@@ -234,7 +244,13 @@
         Cloudflare R2 Blob Usage 
         <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
       </p>
-      <p class="font-semibold text-sm sm:text-base">{r2StorageUsage}</p>
+        <p class="font-semibold text-sm sm:text-base" aria-busy="{r2StorageUsage === null}">
+          {#if r2StorageUsage === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {r2StorageUsage}
+          {/if}
+        </p>
     </div>
 
     <!-- Uptime Last Month -->
@@ -247,8 +263,12 @@
         Uptime for last month 
         <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
       </p>
-      <p class="font-semibold text-sm sm:text-base" class:text-red-500={previousMonthUptimeValue < 99.9} class:text-green-500={previousMonthUptimeValue >= 99.9}>
-        {previousMonthUptime}
+      <p class="font-semibold text-sm sm:text-base" class:text-red-500={previousMonthUptimeValue < 99.9} class:text-green-500={previousMonthUptimeValue >= 99.9} aria-busy="{previousMonthUptime === null}">
+        {#if previousMonthUptime === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {previousMonthUptime}
+          {/if}
       </p>
     </div>
 
@@ -262,8 +282,12 @@
         Uptime for this month 
         <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
       </p>
-      <p class="font-semibold text-sm sm:text-base" class:text-red-500={currentMonthUptimeValue < 99.9} class:text-green-500={currentMonthUptimeValue >= 99.9}>
-        {currentMonthUptime}
+      <p class="font-semibold text-sm sm:text-base" class:text-red-500={currentMonthUptimeValue < 99.9} class:text-green-500={currentMonthUptimeValue >= 99.9} aria-busy="{currentMonthUptime === null}">
+        {#if currentMonthUptime === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {currentMonthUptime}
+          {/if}
       </p>
     </div>
 
@@ -277,7 +301,13 @@
         Total Downtime This Month 
         <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
       </p>
-      <p class="font-semibold text-sm sm:text-base">{totalDowntimeThisMonth}</p>
+        <p class="font-semibold text-sm sm:text-base" aria-busy="{totalDowntimeThisMonth === null}">
+          {#if totalDowntimeThisMonth === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {totalDowntimeThisMonth}
+          {/if}
+        </p>
     </div>
 
   </div>
