@@ -73,18 +73,22 @@ function getTotalSum(data: Record<string, number>): number {
   return Object.values(data).reduce((sum, value) => sum + value, 0);
 }
 
-function formatBlobUsageResponse(data: { usageBytes: string }): string {
-  const bytes = parseInt(data.usageBytes, 10);
-  const units = ["Bytes", "KB", "MB", "GB", "TB"];
-  let size = bytes;
-  let unitIndex = 0;
+function formatBlobUsageResponse(data: { usageBytes: string }, useDecimal: boolean = true): string {
+    const bytes = parseInt(data.usageBytes, 10);
+    if (isNaN(bytes) || bytes <= 0) return '0 B';
 
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex++;
-  }
+    const base = useDecimal ? 1000 : 1024; // Decimal vs Binary
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-  return `${size.toFixed(2)} ${units[unitIndex]}`;
+    let value = bytes;
+    let unitIndex = 0;
+
+    while (value >= base && unitIndex < units.length - 1) {
+      value /= base;
+      unitIndex++;
+    }
+
+    return `${value.toFixed(2)} ${units[unitIndex]}`;
 }
 
 function getMonthRange(offset: number = 0): { firstDay: string; lastDay: string } {

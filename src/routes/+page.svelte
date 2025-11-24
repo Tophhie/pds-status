@@ -98,22 +98,23 @@
     URL.revokeObjectURL(url);
   }
 
-  function parseSize(size: string): number {
-    if (!size) return 0;
 
-    const match = size.match(/([\d.]+)\s*(KB|MB|GB)/i);
-    if (!match) return 0;
+  function parseSize(bytesStr: string, useDecimal = true): string {
+    const bytes = parseInt(bytesStr, 10);
+    if (isNaN(bytes) || bytes <= 0) return '0 B';
 
-    const value = parseFloat(match[1]);
-    const unit = match[2].toUpperCase() as 'KB' | 'MB' | 'GB';
+    const base = useDecimal ? 1000 : 1024; // Decimal vs Binary
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-    const multipliers: Record<'KB' | 'MB' | 'GB', number> = {
-      KB: 1,
-      MB: 1024,
-      GB: 1024 * 1024
-    };
+    let value = bytes;
+    let unitIndex = 0;
 
-    return value * multipliers[unit];
+    while (value >= base && unitIndex < units.length - 1) {
+      value /= base;
+      unitIndex++;
+    }
+
+    return `${value.toFixed(2)} ${units[unitIndex]}`;
   }
 
 
