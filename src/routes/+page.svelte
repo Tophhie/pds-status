@@ -508,7 +508,7 @@
               </td>
 
               <td class="px-4 py-2">
-                {#if accessibilityCache[acc.did]}
+                {#if accessibilityCache[acc.did] === undefined || accessibilityCache[acc.did] === null}
                   {accessibilityCache[acc.did]}
                 {:else}
                   <i class="fa fa-spinner fa-spin text-gray-400"></i>
