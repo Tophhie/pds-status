@@ -23,6 +23,7 @@
   let pdsHealth: any;
   let pdsDescription: any;
   let r2StorageUsage: string | null = null;
+  let r2BlobCount: number | null = null;
   let totalPostsThisYear: number | null = null;
 
   let currentMonthUptime: string | null = null;
@@ -157,7 +158,10 @@
       pdsHealth = pdsHealthData;
       pdsDescription = pdsDescriptionData;
 
-      getBlobUsageFromPDS().then(data => r2StorageUsage = data ?? '0 KB');
+      getBlobUsageFromPDS().then(data => {
+        r2StorageUsage = data.formattedUsage ?? '0 KB';
+        r2BlobCount = data.blobCount ?? 0;
+      });
       getTotalPostsThisYear().then(posts => totalPostsThisYear = posts ?? 0);
 
       getUptimeForMonth(0).then(data => {
@@ -175,7 +179,7 @@
       await Promise.all(
         accounts.map(async acc => {
           handleCache[acc.did] = await getHandleFromDid(acc.did).catch(() => 'Error');
-          blobUsageCache[acc.did] = await getBlobUsageFromPDS(acc.did).catch(() => '0 KB');
+          blobUsageCache[acc.did] = (await getBlobUsageFromPDS(acc.did).catch(() => ({formattedUsage: '0 KB', blobCount: 0}))).formattedUsage;
         })
       );
 
@@ -275,6 +279,25 @@
             <i class="fa fa-spinner fa-spin text-gray-400"></i>
           {:else}
             {r2StorageUsage}
+          {/if}
+        </p>
+    </div>
+
+      <!-- Cloudflare R2 Blob Count -->
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        Data may be stale or cached for up to 1 hour
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Cloudflare R2 Blob Count 
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+        <p class="font-semibold text-sm sm:text-base" aria-busy="{r2StorageUsage === null}">
+          {#if r2BlobCount === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {r2BlobCount}
           {/if}
         </p>
     </div>

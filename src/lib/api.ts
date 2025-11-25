@@ -52,10 +52,10 @@ const getTotalPostsThisYear = async (): Promise<any> => {
     return getTotalSum(data);
 }
 
-const getBlobUsageFromPDS = async (did: string = ""): Promise<string> => {
+const getBlobUsageFromPDS = async (did: string = ""): Promise<{ formattedUsage: string, blobCount: number }> => {
     const response = await fetch(`${Config.TOPHHIE_CLOUD_API_URL}/pds/blobStorageUsageBytes/${did}`);
     const data = await response.json();
-    return formatBlobUsageResponse(data);
+    return {formattedUsage: formatBlobUsageResponse(data), blobCount: data.blobCount ?? 0};
 }
 
 const getUptimeForMonth = async (offset: number = 0): Promise<any> => {
