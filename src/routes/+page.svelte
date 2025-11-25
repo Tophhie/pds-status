@@ -73,13 +73,14 @@
     if (!accounts.length) return;
 
     // CSV headers
-    const headers = ['DID', 'Handle', 'Blob Usage', 'PLC Directory'];
+    const headers = ['DID', 'Handle', 'Blob Usage', 'Accessibility Score (0-100)', 'PLC Directory'];
 
     // CSV rows
     const rows = sortedAccounts.map(acc => [
       acc.did,
       handleCache[acc.did] ?? '',
       blobUsageCache[acc.did] ?? '',
+      accessibilityCache[acc.did] ?? '',
       `https://plc.directory/${acc.did}`
     ]);
 
