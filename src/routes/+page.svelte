@@ -26,6 +26,7 @@
   let r2StorageUsage: string | null = null;
   let r2BlobCount: number | null = null;
   let totalPostsThisYear: number | null = null;
+  let pdsAccessibilityScore: string | null = null;
 
   let currentMonthUptime: string | null = null;
   let currentMonthUptimeValue = 0;
@@ -35,7 +36,7 @@
 
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
-  let accessibilityCache: Record<string, any> = {};
+  let accessibilityCache: Record<string, number> = {};
 
   // Sorting state
   let sortColumn: 'did' | 'handle' | 'blobUsage' | null = null;
@@ -184,11 +185,22 @@
           blobUsageCache[acc.did] = (await getBlobUsageFromPDS(acc.did).catch(() => ({formattedUsage: '0 KB', blobCount: 0}))).formattedUsage;
         })
       );
+
+      // Get accessibility scores
+      await Promise.all(
+        accounts.map(async acc => {
+          const scoreData = await getDidAccessibilityScore(acc.did)
+            .catch(() => ({ score: 0 })); // numeric fallback
+          accessibilityCache[acc.did] = scoreData.score;
+        })
+      );
       
-      // Fetch accessibility scores
-      accounts.map(async acc => {
-        accessibilityCache[acc.did] = (await getDidAccessibilityScore(acc.did).catch(() => "Unknown")).score;
-      })
+      // Calculate combined accessibility score
+      const scores = Object.values(accessibilityCache);
+      console.log(scores)
+      pdsAccessibilityScore = scores.length > 0
+        ? (scores.reduce((sum, val) => sum + val, 0) / scores.length).toFixed(2)
+        : 'Unknown';
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -362,6 +374,25 @@
             <i class="fa fa-spinner fa-spin text-gray-400"></i>
           {:else}
             {totalDowntimeThisMonth}
+          {/if}
+        </p>
+    </div>
+
+    <!-- PDS Accessibility Score -->
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        This is the Accessibility Score for Tophhie Social as a whole.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Combined Accessibility Score
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+        <p class="font-semibold text-sm sm:text-base" aria-busy="{totalDowntimeThisMonth === null}">
+          {#if pdsAccessibilityScore === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {pdsAccessibilityScore}
           {/if}
         </p>
     </div>
