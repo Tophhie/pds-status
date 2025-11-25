@@ -39,10 +39,10 @@
   let accessibilityCache: Record<string, number> = {};
 
   // Sorting state
-  let sortColumn: 'did' | 'handle' | 'blobUsage' | null = null;
+  let sortColumn: 'did' | 'handle' | 'blobUsage' | 'accessibilityScore' | null = null;
   let sortDirection: 'asc' | 'desc' = 'asc';
 
-  function sortBy(column: 'did' | 'handle' | 'blobUsage') {
+  function sortBy(column: 'did' | 'handle' | 'blobUsage' | 'accessibilityScore') {
     if (sortColumn === column) {
       sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
@@ -139,6 +139,9 @@
     } else if (sortColumn === 'blobUsage') {
       valA = parseSize(blobUsageCache[a.did] ?? '0 KB');
       valB = parseSize(blobUsageCache[b.did] ?? '0 KB');
+    } else if (sortColumn === 'accessibilityScore') {
+      valA = accessibilityCache[a.did] ?? '';
+      valB = accessibilityCache[b.did] ?? '';
     }
 
     if (typeof valA === 'number' && typeof valB === 'number') {
@@ -507,8 +510,15 @@
               {/if}
             </th>
 
-            <th class="px-4 py-2 text-left">
+            <!-- Accessibility Score -->
+            <th 
+              class="px-4 py-2 text-left cursor-pointer select-none"
+              on:click={() => sortBy('accessibilityScore')}
+            >
               Accessibility Score (0-100)
+              {#if sortColumn === 'accessibilityScore'}
+                {sortDirection === 'asc' ? '▲' : '▼'}
+              {/if}
             </th>
             <th class="px-4 py-2 text-left">
               PLC Directory
