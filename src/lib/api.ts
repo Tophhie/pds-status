@@ -65,7 +65,13 @@ const getUptimeForMonth = async (offset: number = 0): Promise<any> => {
     return data;
 }
 
-export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear };
+const getDidAccessibilityScore = async (did: string): Promise<any> => {
+    const response = await fetch(`${Config.TOPHHIE_CLOUD_API_URL}/pds/accessibilityScore/${did}`);
+    const data = await response.json();
+    return data;
+}
+
+export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear, getDidAccessibilityScore };
 
 // Helper Functions
 

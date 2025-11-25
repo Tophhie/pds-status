@@ -11,6 +11,7 @@
     getTotalPostsThisYear,
     getBlobUsageFromPDS,
     getUptimeForMonth,
+    getDidAccessibilityScore,
     formatDuration,
     getMonthNameYear
   } from '$lib/api';
@@ -34,6 +35,7 @@
 
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
+  let accessibilityCache: Record<string, any> = {};
 
   // Sorting state
   let sortColumn: 'did' | 'handle' | 'blobUsage' | null = null;
@@ -175,13 +177,18 @@
         previousMonthUptimeValue = data.availability;
       });
 
-      // Fetch handles + blob usage properly and await them
+      // Fetch handles + blob usage + accessibility score properly and await them
       await Promise.all(
         accounts.map(async acc => {
           handleCache[acc.did] = await getHandleFromDid(acc.did).catch(() => 'Error');
           blobUsageCache[acc.did] = (await getBlobUsageFromPDS(acc.did).catch(() => ({formattedUsage: '0 KB', blobCount: 0}))).formattedUsage;
         })
       );
+      
+      // Fetch accessibility scores
+      accounts.map(async acc => {
+        accessibilityCache[acc.did] = (await getDidAccessibilityScore(acc.did).catch(() => "Unknown")).score;
+      })
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -407,6 +414,10 @@
             <p class="text-xs text-gray-400 mb-1">Blob Usage</p>
             <p class="text-sm">{blobUsageCache[acc.did] ?? 'Loading...'}</p>
           </div>
+          <div class="mb-2">
+            <p class="text-xs text-gray-400 mb-1">Accessibility Score (0-100)</p>
+            <p class="text-sm">{accessibilityCache[acc.did] ?? 'Loading...'}</p>
+          </div>
           <div>
             <a 
               href="https://plc.directory/{acc.did}" 
@@ -464,7 +475,9 @@
               {/if}
             </th>
 
-            <!-- PLC Directory (not sortable) -->
+            <th class="px-4 py-2 text-left">
+              Accessibility Score (0-100)
+            </th>
             <th class="px-4 py-2 text-left">
               PLC Directory
             </th>
@@ -478,8 +491,30 @@
           {#each sortedAccounts as acc}
             <tr class="border-t border-gray-700 hover:bg-gray-800">
               <td class="px-4 py-2 break-all">{acc.did}</td>
-              <td class="px-4 py-2">{handleCache[acc.did] ?? 'Loading...'}</td>
-              <td class="px-4 py-2">{blobUsageCache[acc.did] ?? 'Loading...'}</td>
+              <td class="px-4 py-2">
+                {#if handleCache[acc.did]}
+                  {handleCache[acc.did]}
+                {:else}
+                  <i class="fa fa-spinner fa-spin text-gray-400"></i>
+                {/if}
+              </td>
+
+              <td class="px-4 py-2">
+                {#if blobUsageCache[acc.did]}
+                  {blobUsageCache[acc.did]}
+                {:else}
+                  <i class="fa fa-spinner fa-spin text-gray-400"></i>
+                {/if}
+              </td>
+
+              <td class="px-4 py-2">
+                {#if accessibilityCache[acc.did]}
+                  {accessibilityCache[acc.did]}
+                {:else}
+                  <i class="fa fa-spinner fa-spin text-gray-400"></i>
+                {/if}
+              </td>
+
               <td class="px-4 py-2">
                 <a 
                   href="https://plc.directory/{acc.did}" 
