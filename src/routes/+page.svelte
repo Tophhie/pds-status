@@ -173,13 +173,13 @@
       getTotalPostsThisYear().then(posts => totalPostsThisYear = posts ?? 0);
 
       getUptimeForMonth(0).then(data => {
-        currentMonthUptime = `${data.availability.toFixed(2)}%`;
+        currentMonthUptime = `${(Math.floor(data.availability * 100) / 100).toFixed(2)}%`;
         currentMonthUptimeValue = data.availability;
         totalDowntimeThisMonth = formatDuration(data.total_downtime);
       });
 
       getUptimeForMonth(-1).then(data => {
-        previousMonthUptime = `${data.availability.toFixed(2)}%`;
+        previousMonthUptime = `${(Math.floor(data.availability * 100) / 100).toFixed(2)}%`;
         previousMonthUptimeValue = data.availability;
       });
 
@@ -206,7 +206,7 @@
         });
 
         pdsAccessibilityScore = scoreData.pdsAccessibilityScore;
-        
+
       } catch (err) {
         console.error('Failed to fetch accessibility scores:', err);
         pdsAccessibilityScore = 'Unknown';
