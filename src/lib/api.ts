@@ -65,13 +65,13 @@ const getUptimeForMonth = async (offset: number = 0): Promise<any> => {
     return data;
 }
 
-const getDidAccessibilityScore = async (did: string): Promise<any> => {
-    const response = await fetch(`${Config.PDS_URL}/accessibilityScore?did=${did}`);
+const getDidAccessibilityScores = async (): Promise<any> => {
+    const response = await fetch(`${Config.PDS_URL}/accessibilityScore/all`);
     const data = await response.json();
     return data;
 }
 
-export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear, getDidAccessibilityScore };
+export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear, getDidAccessibilityScores };
 
 // Helper Functions
 

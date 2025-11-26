@@ -11,7 +11,7 @@
     getTotalPostsThisYear,
     getBlobUsageFromPDS,
     getUptimeForMonth,
-    getDidAccessibilityScore,
+    getDidAccessibilityScores,
     formatDuration,
     getMonthNameYear
   } from '$lib/api';
@@ -37,6 +37,7 @@
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
   let accessibilityCache: Record<string, number> = {};
+  let accessibilityLastUpdate: string | null = null
 
   // Sorting state
   let sortColumn: 'did' | 'handle' | 'blobUsage' | 'accessibilityScore' | null = null;
@@ -190,21 +191,26 @@
         })
       );
 
-      // Get accessibility scores
-      await Promise.all(
-        accounts.map(async acc => {
-          const scoreData = await getDidAccessibilityScore(acc.did)
-            .catch(() => ({ score: 0 })); // numeric fallback
-          accessibilityCache[acc.did] = scoreData.score;
-        })
-      );
-      
-      // Calculate combined accessibility score
-      const scores = Object.values(accessibilityCache);
-      console.log(scores)
-      pdsAccessibilityScore = scores.length > 0
-        ? (scores.reduce((sum, val) => sum + val, 0) / scores.length).toFixed(2)
-        : 'Unknown';
+
+      try {
+        const scoreData = await getDidAccessibilityScores();
+
+        // Convert individualScores array into a map
+        accessibilityCache = Object.fromEntries(
+          scoreData.individualScores.map((item: { did: any; score: any; }) => [item.did, item.score])
+        );
+
+        accessibilityLastUpdate = scoreData.lastUpdated;
+
+        // Calculate combined score
+        const scores = Object.values(accessibilityCache);
+        pdsAccessibilityScore = scores.length > 0
+          ? (scores.reduce((sum, val) => sum + val, 0) / scores.length).toFixed(2)
+          : 'Unknown';
+      } catch (err) {
+        console.error('Failed to fetch accessibility scores:', err);
+        pdsAccessibilityScore = 'Unknown';
+      }
 
     } catch (error) {
       console.error('Error fetching data:', error);
