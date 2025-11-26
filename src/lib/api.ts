@@ -66,7 +66,7 @@ const getUptimeForMonth = async (offset: number = 0): Promise<any> => {
 }
 
 const getDidAccessibilityScore = async (did: string): Promise<any> => {
-    const response = await fetch(`${Config.TOPHHIE_CLOUD_API_URL}/pds/accessibilityScore/${did}`);
+    const response = await fetch(`${Config.PDS_URL}/accessibilityScore?did=${did}`);
     const data = await response.json();
     return data;
 }
