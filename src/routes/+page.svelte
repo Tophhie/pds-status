@@ -200,13 +200,13 @@
           scoreData.individualScores.map((item: { did: any; score: any; }) => [item.did, item.score])
         );
 
-        accessibilityLastUpdate = scoreData.lastUpdated;
+        accessibilityLastUpdate = new Date(scoreData.lastUpdated).toLocaleString("en-GB", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        });
 
-        // Calculate combined score
-        const scores = Object.values(accessibilityCache);
-        pdsAccessibilityScore = scores.length > 0
-          ? (scores.reduce((sum, val) => sum + val, 0) / scores.length).toFixed(2)
-          : 'Unknown';
+        pdsAccessibilityScore = scoreData.pdsAccessibilityScore;
+        
       } catch (err) {
         console.error('Failed to fetch accessibility scores:', err);
         pdsAccessibilityScore = 'Unknown';
@@ -398,11 +398,30 @@
         Combined Accessibility Score
         <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
       </p>
-        <p class="font-semibold text-sm sm:text-base" aria-busy="{totalDowntimeThisMonth === null}">
+        <p class="font-semibold text-sm sm:text-base" aria-busy="{pdsAccessibilityScore === null}">
           {#if pdsAccessibilityScore === null}
             <i class="fa fa-spinner fa-spin text-gray-400"></i>
           {:else}
             {pdsAccessibilityScore}
+          {/if}
+        </p>
+    </div>
+
+    <!-- PDS Accessibility Score (Last Update) -->
+    <div class="relative group" tabindex="0" role="link">
+      <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block group-focus:block w-max-48 bg-black text-white text-xs rounded px-2 py-1">
+        When the Accessibility Scores for the PDS were last updated.
+        <div class="absolute left-1/2 -translate-x-1/2 top-full h-0 w-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black"></div>
+      </div>
+      <p class="text-gray-400 text-xs sm:text-sm mb-1">
+        Accessibility Score (Last Updated)
+        <i class="fa fa-info-circle text-gray-400 cursor-pointer"></i>
+      </p>
+        <p class="font-semibold text-sm sm:text-base" aria-busy="{accessibilityLastUpdate === null}">
+          {#if accessibilityLastUpdate === null}
+            <i class="fa fa-spinner fa-spin text-gray-400"></i>
+          {:else}
+            {accessibilityLastUpdate}
           {/if}
         </p>
     </div>
