@@ -5,3 +5,6 @@ preview_urls = false
 
 [assets]
 directory = "./dist"
+
+[placement]
+mode = "smart"
