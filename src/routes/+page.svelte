@@ -36,6 +36,7 @@
 
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
+  let accessibilityFetched: boolean = false;
   let accessibilityCache: Record<string, number> = {};
   let accessibilityLastUpdate: string | null = null
 
@@ -207,9 +208,12 @@
 
         pdsAccessibilityScore = scoreData.pdsAccessibilityScore;
 
+        accessibilityFetched = true;
+
       } catch (err) {
         console.error('Failed to fetch accessibility scores:', err);
         pdsAccessibilityScore = 'Unknown';
+        accessibilityFetched = true;
       }
 
     } catch (error) {
@@ -476,7 +480,13 @@
           </div>
           <div class="mb-2">
             <p class="text-xs text-gray-400 mb-1">Accessibility Score (0-100)</p>
-            <p class="text-sm">{accessibilityCache[acc.did] ?? 'Loading...'}</p>
+            <p class="text-sm">
+                {#if (accessibilityCache[acc.did] === undefined || accessibilityCache[acc.did] === null) && !accessibilityFetched}
+                  <i class="fa fa-spinner fa-spin text-gray-400"></i>
+                {:else}
+                  {accessibilityCache[acc.did] ?? "Not yet calculated."}
+                {/if}
+            </p>
           </div>
           <div>
             <a 
@@ -575,10 +585,10 @@
               </td>
 
               <td class="px-4 py-2">
-                {#if accessibilityCache[acc.did] === undefined || accessibilityCache[acc.did] === null}
+                {#if (accessibilityCache[acc.did] === undefined || accessibilityCache[acc.did] === null) && !accessibilityFetched}
                   <i class="fa fa-spinner fa-spin text-gray-400"></i>
                 {:else}
-                  {accessibilityCache[acc.did]}
+                  {accessibilityCache[acc.did] ?? "Not yet calculated."}
                 {/if}
               </td>
 
