@@ -12,6 +12,23 @@ const getDidsFromPDS = async (): Promise<Repo[]> => {
     return data.repos;
 }
 
+const getSocialPreferencesFromPDS = async (did: string): Promise<any> => {
+    try {
+        const response = await fetch(`${Config.PDS_URL}/xrpc/com.atproto.repo.getRecord?repo=${did}&collection=social.tophhie.profile&rkey=self`);
+        const data = await response.json();
+        if (!response.ok) {
+            if (data.error === "RecordNotFound") {
+                return { error: "No social preferences found" };
+            } else {
+                return { error: data.error || "An error occurred" };
+            }
+        }
+        return data.value;
+    } catch (error) {
+        return { error: "No social preferences found" };
+    }
+}
+
 const getHealthFromPDS = async (): Promise<any> => {
     const response = await fetch(`${Config.PDS_URL}/xrpc/_health`);
     const data = await response.json();
@@ -71,7 +88,7 @@ const getDidAccessibilityScores = async (): Promise<any> => {
     return data;
 }
 
-export { getDidsFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear, getDidAccessibilityScores };
+export { getDidsFromPDS, getSocialPreferencesFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear, getDidAccessibilityScores };
 
 // Helper Functions
 

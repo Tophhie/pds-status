@@ -5,6 +5,7 @@
   import { fade } from 'svelte/transition';
   import {
     getDidsFromPDS,
+    getSocialPreferencesFromPDS,
     getHealthFromPDS,
     getDescriptionFromPDS,
     getHandleFromDid,
@@ -36,6 +37,7 @@
 
   let handleCache: Record<string, string> = {};
   let blobUsageCache: Record<string, string> = {};
+  let prefsCache: Record<string, any> = {};
   let accessibilityFetched: boolean = false;
   let accessibilityCache: Record<string, number> = {};
   let accessibilityLastUpdate: string | null = null
@@ -189,6 +191,7 @@
         accounts.map(async acc => {
           handleCache[acc.did] = await getHandleFromDid(acc.did).catch(() => 'Error');
           blobUsageCache[acc.did] = (await getBlobUsageFromPDS(acc.did).catch(() => ({formattedUsage: '0 KB', blobCount: 0}))).formattedUsage;
+          prefsCache[acc.did] = await getSocialPreferencesFromPDS(acc.did).catch(() => null);
         })
       );
 
@@ -484,7 +487,11 @@
                 {#if (accessibilityCache[acc.did] === undefined || accessibilityCache[acc.did] === null) && !accessibilityFetched}
                   <i class="fa fa-spinner fa-spin text-gray-400"></i>
                 {:else}
-                  {accessibilityCache[acc.did] ?? "Not yet calculated."}
+                  {#if prefsCache[acc.did]?.pdsPreferences?.accessibilityScoring === false}
+                    <i class="fa fa-ban text-gray-400" title="User has disabled accessibility score calculation" aria-label="User has disabled accessibility score calculation"></i>
+                  {:else}
+                    {accessibilityCache[acc.did] ?? "Not yet calculated."}
+                  {/if}
                 {/if}
             </p>
           </div>
@@ -588,7 +595,11 @@
                 {#if (accessibilityCache[acc.did] === undefined || accessibilityCache[acc.did] === null) && !accessibilityFetched}
                   <i class="fa fa-spinner fa-spin text-gray-400"></i>
                 {:else}
-                  {accessibilityCache[acc.did] ?? "Not yet calculated."}
+                  {#if prefsCache[acc.did]?.pdsPreferences?.accessibilityScoring === false}
+                    <i class="fa fa-ban text-gray-400" title="User has disabled accessibility score calculation" aria-label="User has disabled accessibility score calculation"></i>
+                  {:else}
+                    {accessibilityCache[acc.did] ?? "Not yet calculated."}  
+                  {/if}
                 {/if}
               </td>
 
