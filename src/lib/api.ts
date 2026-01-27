@@ -2,6 +2,12 @@ import type { Repo } from "@atproto/api/dist/client/types/com/atproto/sync/listR
 import { Config } from "../config";
 import { AtpAgent } from '@atproto/api'
 
+interface PlcData {
+    handle?: string;
+    id?: string;
+    serviceEndpointMatch?: boolean;
+}
+
 const agent = new AtpAgent({
   service: Config.PDS_URL,
 })
@@ -41,21 +47,37 @@ const getDescriptionFromPDS = async (): Promise<any> => {
     return data;
 }
 
-const getHandleFromDid = async (did: string): Promise<string> => {
+const getNeededPlcData = async (did: string): Promise<PlcData> => {
     const response = await fetch(`https://plc.directory/${did}`);
     const data = await response.json();
+
+    let returnObj: PlcData = {};
 
     if (data.alsoKnownAs) {
       const handleAtUri = (data.alsoKnownAs as string[]).find((url: string) => url.startsWith("at://"));
       const handle = handleAtUri?.split("/")[2];
       if (!handle) {
-        return "Handle not found";
+        returnObj.handle = "Handle not found";
       } else {
-        return handle;
+        returnObj.handle = handle;
       }
     } else {
-      return "Handle not found";
+      returnObj.handle = "Handle not found";
     }
+
+    if (data.id) {
+      returnObj.id = data.id;
+    } else {
+      returnObj.id = "ID not found";
+    }
+
+    returnObj.serviceEndpointMatch = data.service?.some(
+        (s: {type: string; serviceEndpoint: string}) =>
+            s.type === "AtprotoPersonalDataServer" &&
+            s.serviceEndpoint === "https://pds.tophhie.cloud"
+    );
+
+    return returnObj;
 }
 
 const getHeatmapData = async (): Promise<any> => {
@@ -88,7 +110,7 @@ const getDidAccessibilityScores = async (): Promise<any> => {
     return data;
 }
 
-export { getDidsFromPDS, getSocialPreferencesFromPDS, getHealthFromPDS, getDescriptionFromPDS, getHandleFromDid, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear, getDidAccessibilityScores };
+export { getDidsFromPDS, getSocialPreferencesFromPDS, getHealthFromPDS, getDescriptionFromPDS, getNeededPlcData, getTotalPostsThisYear, getBlobUsageFromPDS, getUptimeForMonth, formatDuration, getMonthNameYear, getDidAccessibilityScores };
 
 // Helper Functions
 

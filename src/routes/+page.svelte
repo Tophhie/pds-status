@@ -8,7 +8,7 @@
     getSocialPreferencesFromPDS,
     getHealthFromPDS,
     getDescriptionFromPDS,
-    getHandleFromDid,
+    getNeededPlcData,
     getTotalPostsThisYear,
     getBlobUsageFromPDS,
     getUptimeForMonth,
@@ -36,6 +36,7 @@
   let totalDowntimeThisMonth: string | null = null;
 
   let handleCache: Record<string, string> = {};
+  let serviceEndpointMatchCache: Record<string, boolean> = {};
   let blobUsageCache: Record<string, string> = {};
   let prefsCache: Record<string, any> = {};
   let accessibilityFetched: boolean = false;
@@ -189,7 +190,9 @@
       // Fetch handles + blob usage + accessibility score properly and await them
       await Promise.all(
         accounts.map(async acc => {
-          handleCache[acc.did] = await getHandleFromDid(acc.did).catch(() => 'Error');
+          let plcData = await getNeededPlcData(acc.did);
+          handleCache[acc.did] = plcData.handle ?? 'Handle not found';
+          serviceEndpointMatchCache[acc.did] = plcData.serviceEndpointMatch ?? false;
           blobUsageCache[acc.did] = (await getBlobUsageFromPDS(acc.did).catch(() => ({formattedUsage: '0 KB', blobCount: 0}))).formattedUsage;
           prefsCache[acc.did] = await getSocialPreferencesFromPDS(acc.did).catch(() => null);
         })
@@ -495,6 +498,20 @@
                 {/if}
             </p>
           </div>
+          <div class="mb-2">
+            <p class="text-xs text-gray-400 mb-1">Service Endpoint Match</p>
+            <p class="text-sm">
+              {#if serviceEndpointMatchCache[acc.did] === undefined}
+                <i class="fa fa-spinner fa-spin text-gray-400"></i>
+              {:else}
+                {#if serviceEndpointMatchCache[acc.did] === true}
+                  <i class="fa fa-solid fa-check" style="color: #63E6BE;"></i>
+                {:else}
+                  <i class="fa fa-solid fa-x" style="color: #ff0000;"></i>
+                {/if}
+              {/if}
+            </p>
+          </div>
           <div>
             <a 
               href="https://plc.directory/{acc.did}" 
@@ -566,6 +583,9 @@
               PLC Directory
             </th>
             <th class="px-4 py-2 text-left">
+              Service Endpoint Match
+            </th>
+            <th class="px-4 py-2 text-left">
               Copy Repo Info
             </th>
           </tr>
@@ -614,6 +634,17 @@
                 >
                   <i class="fa fa-solid fa-external-link fa-lg"></i>
                 </a>
+              </td>
+              <td class="px-4 py-2">
+                {#if serviceEndpointMatchCache[acc.did] === undefined}
+                  <i class="fa fa-spinner fa-spin text-gray-400"></i>
+                {:else}
+                  {#if serviceEndpointMatchCache[acc.did] === true}
+                    <i class="fa fa-solid fa-check fa-lg" style="color: #63E6BE;" aria-label="Service Endpoint Matches"></i>
+                  {:else}
+                    <i class="fa fa-solid fa-x fa-lg" style="color: #ff0000;" aria-label="Service Endpoint Does Not Match"></i>
+                  {/if}
+                {/if}
               </td>
               <td class="px-4 py-2">
                 <button on:click={() => copyRepoToClipboard(acc)} aria-label="Copy repo info" style="cursor: pointer;">
