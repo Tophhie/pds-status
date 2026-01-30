@@ -507,7 +507,7 @@
                 {#if serviceEndpointMatchCache[acc.did] === true}
                   <i class="fa fa-solid fa-check" style="color: #63E6BE;"></i>
                 {:else}
-                  <i class="fa fa-solid fa-x" style="color: #ff0000;"></i>
+                  <i class="fa fa-solid fa-times" style="color: #ff0000;"></i>
                 {/if}
               {/if}
             </p>
@@ -642,7 +642,7 @@
                   {#if serviceEndpointMatchCache[acc.did] === true}
                     <i class="fa fa-solid fa-check fa-lg" style="color: #63E6BE;" aria-label="Service Endpoint Matches"></i>
                   {:else}
-                    <i class="fa fa-solid fa-x fa-lg" style="color: #ff0000;" aria-label="Service Endpoint Does Not Match"></i>
+                    <i class="fa fa-solid fa-times fa-lg" style="color: #ff0000;" aria-label="Service Endpoint Does Not Match"></i>
                   {/if}
                 {/if}
               </td>
