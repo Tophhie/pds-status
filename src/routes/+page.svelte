@@ -14,7 +14,8 @@
     getUptimeForMonth,
     getDidAccessibilityScores,
     formatDuration,
-    getMonthNameYear
+    getMonthNameYear,
+    tidToDate
   } from '$lib/api';
   import type { Repo } from '@atproto/api/dist/client/types/com/atproto/sync/listRepos';
 
@@ -78,13 +79,14 @@
     if (!accounts.length) return;
 
     // CSV headers
-    const headers = ['DID', 'Handle', 'Blob Usage', 'Accessibility Score (0-100)', 'PLC Directory'];
+    const headers = ['DID', 'Handle', 'Blob Usage', 'Last Activity', 'Accessibility Score (0-100)', 'PLC Directory'];
 
     // CSV rows
     const rows = sortedAccounts.map(acc => [
       acc.did,
       handleCache[acc.did] ?? '',
       blobUsageCache[acc.did] ?? '',
+      tidToDate(acc.rev).toLocaleString(),
       accessibilityCache[acc.did] ?? '',
       `https://plc.directory/${acc.did}`
     ]);
@@ -485,7 +487,7 @@
             <p class="text-sm">{blobUsageCache[acc.did] ?? 'Loading...'}</p>
           </div>
           <div class="mb-2">
-            <p class="text-xs text-gray-400 mb-1">Accessibility Score (0-100)</p>
+            <p class="text-xs text-gray-400 mb-1">Accessibility Score</p>
             <p class="text-sm">
                 {#if (accessibilityCache[acc.did] === undefined || accessibilityCache[acc.did] === null) && !accessibilityFetched}
                   <i class="fa fa-spinner fa-spin text-gray-400"></i>
@@ -497,6 +499,10 @@
                   {/if}
                 {/if}
             </p>
+          </div>
+          <div class="mb-2">
+            <p class="text-xs text-gray-400 mb-1">Last Activity</p>
+            <p class="text-sm">{tidToDate(acc.rev)}</p>
           </div>
           <div class="mb-2">
             <p class="text-xs text-gray-400 mb-1">Service Endpoint Match</p>
@@ -574,10 +580,13 @@
               class="px-4 py-2 text-left cursor-pointer select-none"
               on:click={() => sortBy('accessibilityScore')}
             >
-              Accessibility Score (0-100)
+              Accessibility Score
               {#if sortColumn === 'accessibilityScore'}
                 {sortDirection === 'asc' ? '▲' : '▼'}
               {/if}
+            </th>
+            <th class="px-4 py-2 text-left">
+              Last Activity
             </th>
             <th class="px-4 py-2 text-left">
               PLC Directory
@@ -622,6 +631,8 @@
                   {/if}
                 {/if}
               </td>
+
+              <td class="px-4 py-2">{tidToDate(acc.rev).toLocaleString()}</td>
 
               <td class="px-4 py-2">
                 <a 

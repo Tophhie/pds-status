@@ -187,3 +187,21 @@ function formatDuration(seconds: number): string {
     const days = Math.floor(hours / 24);
     return `${days} day${days !== 1 ? 's' : ''}`;
 }
+
+
+const TID_ALPHABET = "234567abcdefghijklmnopqrstuvwxyz";
+const TID_MAP: Record<string, number> = Object.fromEntries([...TID_ALPHABET].map((c, i) => [c, i]));
+
+export function tidToDate(tid: string): Date {
+  if (tid.length !== 13) throw new Error("TID must be 13 characters");
+  let n = 0n;
+  for (const ch of tid) {
+    const v = TID_MAP[ch];
+    if (v === undefined) throw new Error(`Invalid TID character: ${ch}`);
+    n = (n << 5n) | BigInt(v);
+  }
+  const micros = n >> 10n;
+  const ms = micros / 1000n;
+  const d = new Date(Number(ms));
+  return d;
+}
